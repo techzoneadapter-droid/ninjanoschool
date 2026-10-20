@@ -1,3 +1,7 @@
 @ECHO OFF
-java -server -jar -Dfile.encoding=UTF-8 -Xms1000M -Xmx1000M dist/NSO-HUYDAT.jar
-PAUSE
+SETLOCAL
+PUSHD "%~dp0"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\start-server.ps1"
+SET "NSO_EXIT=%ERRORLEVEL%"
+POPD
+EXIT /B %NSO_EXIT%
