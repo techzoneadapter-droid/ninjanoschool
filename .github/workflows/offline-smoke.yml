@@ -73,7 +73,7 @@ jobs:
       - name: Build Java server and check local TCP
         run: |
           ant -noinput clean jar
-          NSO_MYSQL_PASSWORD="$NSO_MYSQL_PASSWORD" java -Dfile.encoding=UTF-8 -cp 'dist/NSO-HUYDAT.jar:lib/*' huydat.server.Server > /tmp/nso-local-server.log 2>&1 &
+          NSO_MYSQL_PASSWORD="$NSO_MYSQL_PASSWORD" java -Dfile.encoding=UTF-8 -cp 'dist/NSO-HUYDAT.jar:lib/*:.offline/drivers/*' huydat.server.Server > /tmp/nso-local-server.log 2>&1 &
           echo $! > /tmp/nso-server.pid
           python3 - <<'PY'
           import socket, time, pathlib, sys
