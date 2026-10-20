@@ -14,20 +14,11 @@ Thay đổi tự vận hành: máy chủ chỉ nghe **127.0.0.1** theo mặc đ�
 4. Chạy `docker compose config` để kiểm tra và `docker compose up -d db` để khởi động MariaDB. Chỉ cổng **127.0.0.1:3306** được mở trên máy chủ, không công khai database.
 5. Đợi `docker compose ps` báo database khỏe. Container tạo mới hai database `nsohuyda_data` và `nsohuyda_account` qua `deploy/initdb` **chỉ khi volume còn trống**.
 
-## Nạp SQL (chỉ dùng bộ dữ liệu bạn có quyền sử dụng)
+## Dữ liệu SQL an toàn cho môi trường test
 
-Repo có 2 dump SQL ở thư mục `database-sql/`:
-- `nsohuyda_data (1).sql` → `nsohuyda_data`
-- `nsohuyda_account (1).sql` → `nsohuyda_account`
+**Không nạp trực tiếp dump tài khoản gốc** vì có dữ liệu người chơi và giao dịch của máy chủ khác. Đối với Windows offline, làm theo [WINDOWS_OFFLINE.md](WINDOWS_OFFLINE.md) và chạy `TEST-NINJA-SCHOOL.cmd` để tự động tách SQL: chỉ nạp game reference data, lấy schema tài khoản trống, tạo một user thử hoàn toàn mới.
 
-Hãy đọc/kiểm tra dump trước khi nạp; dump gốc có thể chứa tài khoản, dữ liệu cá nhân hoặc nội dung không có quyền tái sử dụng. Không nhập tài khoản của server khác vào môi trường production. Trên Windows PowerShell, có thể mở từng file bằng giao diện Adminer/DBeaver để import vào đúng database. Trên Linux/macOS:
-
-```bash
-docker compose exec -T db mariadb -u root -p'<DB_ROOT_PASSWORD>' nsohuyda_data < 'database-sql/nsohuyda_data (1).sql'
-docker compose exec -T db mariadb -u root -p'<DB_ROOT_PASSWORD>' nsohuyda_account < 'database-sql/nsohuyda_account (1).sql'
-```
-
-Đừng đưa mật khẩu thật lên lịch sử shell; trên VPS nên dùng nhập mật khẩu tương tác hoặc file quyền 600 khi triển khai thực tế. **Chưa xác nhận dump nhập thành công với MariaDB 10.11**; hãy thử trên dữ liệu test, đối chiếu số bảng.
+Lệnh tạo SQL sạch khi làm thủ công: `python scripts/prepare_offline_sql.py` (output ở `.offline/generated/`, bị Git bỏ qua). Chỉ dùng SQL có quyền sử dụng hợp lệ. Tự kiểm tra quyền đối với nội dung tài nguyên trước khi triển khai công khai.
 
 ## Build và chạy
 
