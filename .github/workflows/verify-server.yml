@@ -33,3 +33,17 @@ jobs:
         run: |
           test -f dist/NSO-HUYDAT.jar
           unzip -p dist/NSO-HUYDAT.jar META-INF/MANIFEST.MF | grep -q 'Main-Class: huydat.server.Server'
+      - name: Verify safe refusal without DB password
+        run: |
+          set +e
+          output=$(timeout 15s java -jar dist/NSO-HUYDAT.jar 2>&1)
+          code=$?
+          set -e
+          echo "$output" | grep -q "Set NSO_MYSQL_PASSWORD"
+          test "$code" -ne 0
+          test "$code" -ne 124
+      - name: Validate Docker Compose configuration
+        env:
+          NSO_DB_ROOT_PASSWORD: ci-test-only-not-secret
+          NSO_MYSQL_PASSWORD: ci-test-only-not-secret
+        run: docker compose -f compose.yaml config --quiet
