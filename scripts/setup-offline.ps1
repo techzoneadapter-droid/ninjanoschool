@@ -52,7 +52,7 @@ if (-not $py -and (Get-Command 'python' -ErrorAction SilentlyContinue)) {
     if ($LASTEXITCODE -eq 0) { $py = @('python') }
 }
 if (-not $py) { throw 'Install Python 3: https://www.python.org/downloads/windows/ (tick Add Python to PATH)' }
-$javaVersion = (& java -version 2>&1 | Out-String)
+$javaVersion = (& cmd.exe /c "java -version 2>&1" | Out-String)
 if ($javaVersion -notmatch 'version "1[.]8[.]|version "8[.]') {
     throw "This legacy backend must be built/tested with Java 8. Found: $javaVersion"
 }
