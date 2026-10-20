@@ -19,9 +19,9 @@ def analyze(path):
     print("  CREATE TABLE:", ", ".join(tables) or "(none)")
     print("  tables with INSERT statements:", ", ".join(sorted(inserts)) or "(none)")
     if "player" in tables:
-        schema = re.search(r"(?is)CREATE\\s+TABLE\\s+`player`\\s*\\((.*?)\\)\\s*ENGINE\\s*=", raw)
+        schema = re.search(r"(?is)CREATE\s+TABLE\s+`player`\s*\((.*?)\)\s*ENGINE\s*=", raw)
         if schema:
-            cols = re.findall(r"(?m)^\\s*`(\\w+)`\\s+([^,\\r\\n]+)", schema.group(1))
+            cols = re.findall(r"(?m)^\s*`(\w+)`\s+([^,\r\n]+)", schema.group(1))
             print("  player schema column definitions (no account records):")
             for name, definition in cols:
                 print("   ", name, definition.strip()[:160])
