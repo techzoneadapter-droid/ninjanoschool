@@ -18,6 +18,13 @@ def analyze(path):
     print("  database USE clauses:", ", ".join(schemas) or "(none)")
     print("  CREATE TABLE:", ", ".join(tables) or "(none)")
     print("  tables with INSERT statements:", ", ".join(sorted(inserts)) or "(none)")
+    if "player" in tables:
+        schema = re.search(r"(?is)CREATE\\s+TABLE\\s+`player`\\s*\\((.*?)\\)\\s*ENGINE\\s*=", raw)
+        if schema:
+            cols = re.findall(r"(?m)^\\s*`(\\w+)`\\s+([^,\\r\\n]+)", schema.group(1))
+            print("  player schema column definitions (no account records):")
+            for name, definition in cols:
+                print("   ", name, definition.strip()[:160])
     return tables, inserts
 
 if __name__ == "__main__":
