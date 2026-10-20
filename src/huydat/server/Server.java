@@ -81,8 +81,14 @@ public class Server {
         listenSocket = null;
         try {
           
-            listenSocket = new ServerSocket(manager.post);
-            System.err.println("port chạy: " + Server.manager.post);
+            // Default to loopback; expose the game port explicitly using NSO_BIND_HOST.
+            String bindHost = System.getenv("NSO_BIND_HOST");
+            if (bindHost == null || bindHost.trim().isEmpty()) {
+                bindHost = "127.0.0.1";
+            }
+            listenSocket = new ServerSocket();
+            listenSocket.bind(new InetSocketAddress(bindHost, manager.post));
+            System.out.println("NSO listening on " + bindHost + ":" + Server.manager.post);
             while (Server.start) {
                 Socket clientSocket = listenSocket.accept();
                 Session conn = new Session(clientSocket, serverMessageHandler);
