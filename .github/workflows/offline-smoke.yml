@@ -1,0 +1,94 @@
+name: Windows Offline Environment Smoke Tests
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/**'
+      - 'compose.yaml'
+      - '.env.example'
+      - 'run.bat'
+      - 'TEST-NINJA-SCHOOL.cmd'
+      - 'STATUS-NINJA-SCHOOL.cmd'
+      - 'STOP-LOCAL-DATABASE.cmd'
+      - '.github/workflows/offline-smoke.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows-preflight:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Windows PowerShell script wiring
+        shell: powershell
+        run: |
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/setup-offline.ps1 -ValidateOnly
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $script = [System.IO.File]::ReadAllText('scripts/setup-offline.ps1')
+          $token = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseInput($script, [ref]$token, [ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) { $errors | Out-String | Write-Error; exit 1 }
+  isolated-db-server:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NSO_DB_ROOT_PASSWORD: local-ci-root-password-123456789
+      NSO_MYSQL_PASSWORD: local-ci-user-password-123456789
+      NSO_MYSQL_HOST: 127.0.0.1
+      NSO_BIND_HOST: 127.0.0.1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+      - name: Install Ant and make safe SQL
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ant
+          python3 scripts/prepare_offline_sql.py
+          printf "INSERT INTO player (username,password,ninja,status,ban) VALUES ('testninja','TESTPASS123','[]',0,0);\n" > .offline/generated/demo-account.sql
+      - name: Start isolated MariaDB
+        run: |
+          docker compose config --quiet
+          docker compose up -d db
+          for i in $(seq 1 45); do
+            container="$(docker compose ps -q db)"
+            if [ -n "$container" ] && [ "$(docker inspect --format '{{.State.Health.Status}}' "$container")" = "healthy" ]; then break; fi
+            sleep 2
+          done
+          container="$(docker compose ps -q db)"
+          test "$(docker inspect --format '{{.State.Health.Status}}' "$container")" = healthy
+          docker cp .offline/generated/game_data.sql "$container:/tmp/nso-game-data.sql"
+          docker cp .offline/generated/account_schema.sql "$container:/tmp/nso-account-schema.sql"
+          docker cp .offline/generated/demo-account.sql "$container:/tmp/nso-demo-account.sql"
+          docker cp scripts/init-local-db.sh "$container:/tmp/nso-init-local-db.sh"
+          docker exec "$container" sh /tmp/nso-init-local-db.sh
+          docker exec "$container" sh /tmp/nso-init-local-db.sh
+      - name: Build Java server and check local TCP
+        run: |
+          ant -noinput clean jar
+          NSO_MYSQL_PASSWORD="$NSO_MYSQL_PASSWORD" java -Dfile.encoding=UTF-8 -jar dist/NSO-HUYDAT.jar > /tmp/nso-local-server.log 2>&1 &
+          echo $! > /tmp/nso-server.pid
+          python3 - <<'PY'
+          import socket, time, pathlib, sys
+          deadline = time.monotonic() + 45
+          while time.monotonic() < deadline:
+              try:
+                  with socket.create_connection(("127.0.0.1", 14444), timeout=1):
+                      print("PASS: Java server accepted TCP on 127.0.0.1:14444")
+                      sys.exit(0)
+              except OSError:
+                  time.sleep(1)
+          log = pathlib.Path("/tmp/nso-local-server.log")
+          print("FAIL: Java server did not open port; tail:")
+          print(log.read_text(errors="replace")[-6000:] if log.exists() else "(no log)")
+          sys.exit(1)
+          PY
+      - name: Shutdown without deleting game data
+        if: always()
+        run: |
+          if [ -f /tmp/nso-server.pid ]; then kill "$(cat /tmp/nso-server.pid)" || true; fi
+          docker compose down
