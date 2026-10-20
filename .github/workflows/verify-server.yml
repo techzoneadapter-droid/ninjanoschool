@@ -1,0 +1,35 @@
+name: Verify NSO Java server
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure Java 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+      - name: Install Apache Ant
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ant
+      - name: Check local scripts and safe defaults
+        run: |
+          bash -n scripts/start-server.sh
+          test -f .env.example
+          test -f compose.yaml
+          ! grep -Eqi 'nsohuydat\\.online|Huydat123' ninja.conf
+          grep -q '127.0.0.1' ninja.conf
+      - name: Compile the backend from source
+        run: ant -noinput clean jar
+      - name: Verify jar entry point
+        run: |
+          test -f dist/NSO-HUYDAT.jar
+          unzip -p dist/NSO-HUYDAT.jar META-INF/MANIFEST.MF | grep -q 'Main-Class: huydat.server.Server'
