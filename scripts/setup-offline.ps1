@@ -96,6 +96,18 @@ $demoSqlPath = Join-Path $generatedDir 'demo-account.sql'
 $demoSql = "INSERT INTO player (id,username,password,ninja,status,ban) VALUES (1,'$user','$accountPass','[]',0,0);"
 [System.IO.File]::WriteAllText($demoSqlPath, $demoSql, $utf8)
 
+$driverDir = Join-Path $offlineDir 'drivers'
+New-Item -Force -ItemType Directory $driverDir | Out-Null
+$driverJar = Join-Path $driverDir 'mariadb-java-client-2.7.13.jar'
+if (-not (Test-Path -LiteralPath $driverJar)) {
+    Write-Host "Fetching MariaDB Connector/J 2.7.13 once from Maven Central ..." -ForegroundColor Cyan
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    Invoke-WebRequest -Uri 'https://repo.maven.apache.org/maven2/org/mariadb/jdbc/mariadb-java-client/2.7.13/mariadb-java-client-2.7.13.jar' -OutFile $driverJar -UseBasicParsing
+}
+if ((Get-Item -LiteralPath $driverJar).Length -lt 300000) {
+    throw "MariaDB Connector/J download incomplete. Delete the incomplete local JAR and retry."
+}
+
 Write-Host "[3/6] Generating safe game data + EMPTY account schema" -ForegroundColor Cyan
 if ($py.Count -eq 2) {
     & py -3 scripts/prepare_offline_sql.py
