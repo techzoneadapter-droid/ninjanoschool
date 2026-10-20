@@ -15,7 +15,7 @@ services:
       - nso_database:/var/lib/mysql
       - ./deploy/initdb:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "mariadb-admin ping --silent -h 127.0.0.1 --user=root --password=\"$MARIADB_ROOT_PASSWORD\""]
+      test: ["CMD-SHELL", "mariadb-admin ping --silent -h 127.0.0.1 --user=root --password=\"$$MARIADB_ROOT_PASSWORD\""]
       interval: 10s
       timeout: 5s
       retries: 12
