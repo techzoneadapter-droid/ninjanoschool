@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: huydat.server.Server
+Class-Path: lib/mysql-connector-java-5.1.23-bin.jar lib/json_simple-1.1.jar lib/joda-time-2.9.4.wso2v1.jar
+
