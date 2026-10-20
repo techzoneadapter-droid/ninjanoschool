@@ -14,4 +14,4 @@ if [[ -z "${NSO_MYSQL_PASSWORD:-}" ]]; then
   echo "Set NSO_MYSQL_PASSWORD in a private .env file before starting the server." >&2
   exit 1
 fi
-exec java -Dfile.encoding=UTF-8 -Xms256m -Xmx1024m -cp "dist/NSO-HUYDAT.jar:lib/*" huydat.server.Server
+exec java -Dfile.encoding=UTF-8 -Xms256m -Xmx1024m -cp "dist/NSO-HUYDAT.jar:lib/*:.offline/drivers/*" huydat.server.Server
