@@ -1,0 +1,15 @@
+# Runtime secrets (never commit)
+.env
+.env.*
+!.env.example
+ninja.local.conf
+secrets/
+# New server-generated data and backups
+backups/
+*.log
+log/
+lichsu/
+# Local tooling
+.idea/
+.vscode/
+.DS_Store
