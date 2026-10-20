@@ -98,10 +98,12 @@ public class Manager {
         chanle = new ChanLEonl[1];this.chanle[0] = new ChanLEonl(); 
         this.rotationluck[0] = new Lucky("Vòng xoay vip", (byte)0, (short)120, 1000000, 50000000, 1000000000);
         this.rotationluck[1] = new Lucky("Vòng xoay lượng", (byte)1, (short)120, 10000, 100000, 500000000);
-        this.rotationluck[0].start();
-        this.rotationluck[1].start();
+        // Fail fast when DB credentials/schema are missing; do not launch background
+        // game threads until initial database and version data are ready.
         this.loadDataBase();
         this.loadVersion();
+        this.rotationluck[0].start();
+        this.rotationluck[1].start();
         
     }
       public void updatecl() {
