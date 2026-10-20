@@ -93,7 +93,7 @@ if (Test-Path -LiteralPath $credsFile) {
     [System.IO.File]::WriteAllText($credsFile, $lines, $utf8)
 }
 $demoSqlPath = Join-Path $generatedDir 'demo-account.sql'
-$demoSql = "INSERT INTO player (username,password,ninja,status,ban) VALUES ('$user','$accountPass','[]',0,0);"
+$demoSql = "INSERT INTO player (id,username,password,ninja,status,ban) VALUES (1,'$user','$accountPass','[]',0,0);"
 [System.IO.File]::WriteAllText($demoSqlPath, $demoSql, $utf8)
 
 Write-Host "[3/6] Generating safe game data + EMPTY account schema" -ForegroundColor Cyan
