@@ -35,6 +35,9 @@ import org.json.simple.JSONValue;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.time.Instant;
 import java.util.*;
@@ -93,7 +96,6 @@ public class Manager {
         this.NinjaS = new String[]{"Chưa vào lớp", "Ninja Kiếm", "Ninja Phi Tiêu", "Ninja Kunai", "Ninja Cung", "Ninja Đao", "Ninja Quạt"};
         taixiu = new TaiXiu[1];this.taixiu[0] = new TaiXiu(); 
         chanle = new ChanLEonl[1];this.chanle[0] = new ChanLEonl(); 
-        this.loadConfigFile();
         this.rotationluck[0] = new Lucky("Vòng xoay vip", (byte)0, (short)120, 1000000, 50000000, 1000000000);
         this.rotationluck[1] = new Lucky("Vòng xoay lượng", (byte)1, (short)120, 10000, 100000, 500000000);
         this.rotationluck[0].start();
@@ -146,13 +148,23 @@ public class Manager {
     }
 
     private void loadConfigFile() {
-        byte[] ab = GameSrc.loadFile("ninja.conf").toByteArray();
-        if (ab == null) {
-            System.out.println("Config file not found!");
-            System.exit(0);
+        // Keep production secrets in an ignored external config or environment.
+        String externalConfig = System.getenv("NSO_CONFIG_FILE");
+        byte[] ab;
+        try {
+            if (externalConfig != null && !externalConfig.trim().isEmpty()) {
+                ab = Files.readAllBytes(Paths.get(externalConfig.trim()));
+            } else {
+                ab = GameSrc.loadFile("ninja.conf").toByteArray();
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to read NSO_CONFIG_FILE", e);
+        }
+        if (ab == null || ab.length == 0) {
+            throw new IllegalStateException("Missing ninja.conf / NSO_CONFIG_FILE");
         }
 
-        String data = new String(ab);
+        String data = new String(ab, StandardCharsets.UTF_8);
         HashMap<String, String> configMap = new HashMap();
         StringBuilder sbd = new StringBuilder();
         boolean bo = false;
@@ -176,10 +188,28 @@ public class Manager {
                         String key = sbf.substring(0, j).trim();
                         String value = sbf.substring(j + 1).trim();
                         configMap.put(key, value);
-                        System.out.println("config: " + key + "-" + value);
+                        // Never print config values: passwords may be present.
                     }
                 }
                 sbd.setLength(0);
+            }
+        }
+
+        // Environment wins over file values; no live credentials are committed to Git.
+        String[][] overrides = {
+            {"NSO_PUBLIC_HOST", "host"},
+            {"NSO_PORT", "post"},
+            {"NSO_MYSQL_HOST", "mysql-host"},
+            {"NSO_MYSQL_PORT", "mysql-port"},
+            {"NSO_MYSQL_USER", "mysql-user"},
+            {"NSO_MYSQL_PASSWORD", "mysql-password"},
+            {"NSO_MYSQL_DATABASE_DATA", "mysql-database_data"},
+            {"NSO_MYSQL_DATABASE_ACCOUNT", "mysql-database_ninja"}
+        };
+        for (String[] override : overrides) {
+            String env = System.getenv(override[0]);
+            if (env != null && !env.trim().isEmpty()) {
+                configMap.put(override[1], env);
             }
         }
 
@@ -240,7 +270,7 @@ public class Manager {
         if (configMap.containsKey("mysql-password")) {
             this.mysql_pass = (String)configMap.get("mysql-password");
         } else {
-            this.mysql_pass = "rewind";
+            this.mysql_pass = "";
         }
 
         if (configMap.containsKey("mysql-database_data")) {
@@ -296,7 +326,7 @@ public class Manager {
         } else {
             max_level_up = 130;
         }
-        if (configMap.containsKey("max-level-up")) {
+        if (configMap.containsKey("acclimitIP")) {
             this.acclimitIP = Integer.parseInt((String)configMap.get("acclimitIP"));
         } else {
             this.acclimitIP = 10;
@@ -305,6 +335,9 @@ public class Manager {
     }
 
     private void loadDataBase() {
+        if (this.mysql_pass == null || this.mysql_pass.isEmpty()) {
+            throw new IllegalStateException("Set NSO_MYSQL_PASSWORD (or mysql-password in an ignored NSO_CONFIG_FILE) before starting the server.");
+        }
         SQLManager.create(this.mysql_host, this.mysql_port, this.mysql_database_data, this.mysql_user, this.mysql_pass);
         int i = 0;
 
