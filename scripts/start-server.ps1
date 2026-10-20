@@ -14,5 +14,5 @@ if (Test-Path ".env") {
 if ([string]::IsNullOrWhiteSpace($env:NSO_MYSQL_PASSWORD)) {
     throw "Set NSO_MYSQL_PASSWORD in a private .env file before starting the server."
 }
-& java "-Dfile.encoding=UTF-8" "-Xms256m" "-Xmx1024m" "-jar" "dist/NSO-HUYDAT.jar"
+& java "-Dfile.encoding=UTF-8" "-Xms256m" "-Xmx1024m" "-cp" "dist/NSO-HUYDAT.jar;lib/*" "huydat.server.Server"
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
