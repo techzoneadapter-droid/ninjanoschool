@@ -3426,7 +3426,7 @@ case 14: {
                                 Manager.alert.sendAlert(player);
                                 m = new Message(-23);
                                 m.writer().writeInt(player.c.get().id);
-                                m.writer().writeUTF("chào mừng bạn đã vào sever Hồi Ức. sever do Vũ Huy Đạt điều khuyển . \n nsohuydat.online");
+                                m.writer().writeUTF("Chào mừng bạn đến với máy chủ Ninja School đang được phát triển.");
                                 // Tu tiên
                             //    if (player.c.matkhauatm >= 1) {
                   //  Service.chatKTG("Ngân hàng VHĐ chào mừng " + player.c.name +"  đã vào sever hãy ghé qua ngân hàng nếu bạn cần <3.");
