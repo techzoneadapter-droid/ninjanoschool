@@ -49,3 +49,10 @@ jobs:
         run: docker compose -f compose.yaml config --quiet
       - name: Inspect dump schemas without exposing account data
         run: python3 scripts/analyze_sql.py 'database-sql/nsohuyda_account (1).sql' 'database-sql/nsohuyda_data (1).sql'
+      - name: Generate sanitized offline SQL and check account privacy
+        run: |
+          python3 scripts/prepare_offline_sql.py
+          test -s .offline/generated/account_schema.sql
+          test -s .offline/generated/game_data.sql
+          ! grep -Eqi '(^|[[:space:]])(INSERT|REPLACE)[[:space:]]+INTO' .offline/generated/account_schema.sql
+          grep -Eqi '(^|[[:space:]])INSERT[[:space:]]+INTO' .offline/generated/game_data.sql
