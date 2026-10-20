@@ -11,12 +11,12 @@ public class SQLManager {
 
     public static synchronized void create(String host, int port, String database, String user, String pass) {
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("org.mariadb.jdbc.Driver");
         }
         catch (ClassNotFoundException e2) {
             throw new IllegalStateException("MySQL JDBC driver not found", e2);
         }
-        String url = "jdbc:mysql://" + host +":"+port+"/" + database ;
+        String url = "jdbc:mariadb://" + host +":"+port+"/" + database ;
         System.out.println("Kết Nối MySQL : " + url);
         try {
             SQLManager.conn = DriverManager.getConnection(url, user, pass);
