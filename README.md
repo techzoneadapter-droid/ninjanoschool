@@ -1,3 +1,14 @@
+## Chạy thử offline trên Windows (không cần VPS)
+
+1. Cài **Docker Desktop (Linux containers), JDK 8, Apache Ant và Python 3**.
+2. Clone hoặc cập nhật repository về máy Windows.
+3. Nhấp đúp **[TEST-NINJA-SCHOOL.cmd](TEST-NINJA-SCHOOL.cmd)** để thiết lập MariaDB local, nạp **dữ liệu game + tài khoản test mới** và build server Java.
+4. Mở **[STATUS-NINJA-SCHOOL.cmd](STATUS-NINJA-SCHOOL.cmd)** để kiểm tra cổng 127.0.0.1:14444.
+
+Xem toàn bộ hướng dẫn: [WINDOWS_OFFLINE.md](docs/WINDOWS_OFFLINE.md).
+
+**Chưa có client tương thích được xác minh**. Đây là backend test nội bộ, không phải game phát hành công khai.
+
 # Source code VIP NEW backend server game ninja school online Dev Mob by GVN
 # Source code VIP NEW backend server game ninja school online version Hồi Ức version VIP NEW
 <img width="450" height="250" src="https://ninjaschool.org/images/slide-01.png">
