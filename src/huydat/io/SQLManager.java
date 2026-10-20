@@ -14,8 +14,7 @@ public class SQLManager {
             Class.forName("com.mysql.jdbc.Driver");
         }
         catch (ClassNotFoundException e2) {
-            System.out.println("Driver mysql not found!");
-            System.exit(0);
+            throw new IllegalStateException("MySQL JDBC driver not found", e2);
         }
         String url = "jdbc:mysql://" + host +":"+port+"/" + database ;
         System.out.println("Kết Nối MySQL : " + url);
@@ -25,8 +24,7 @@ public class SQLManager {
             System.out.println("Kết nối thành công!");
         }
         catch (SQLException e) {
-            e.printStackTrace();
-            System.exit(0);
+            throw new IllegalStateException("Unable to connect to NSO database at " + host + ":" + port + "/" + database, e);
         }
     }
 
