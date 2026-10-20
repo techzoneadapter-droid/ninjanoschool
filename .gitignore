@@ -13,3 +13,6 @@ lichsu/
 .idea/
 .vscode/
 .DS_Store
+
+# Generated offline DB data and local demo credentials
+.offline/
