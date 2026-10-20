@@ -47,3 +47,5 @@ jobs:
           NSO_DB_ROOT_PASSWORD: ci-test-only-not-secret
           NSO_MYSQL_PASSWORD: ci-test-only-not-secret
         run: docker compose -f compose.yaml config --quiet
+      - name: Inspect dump schemas without exposing account data
+        run: python3 scripts/analyze_sql.py 'database-sql/nsohuyda_account (1).sql' 'database-sql/nsohuyda_data (1).sql'
