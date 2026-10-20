@@ -520,10 +520,10 @@ if (sec %5 == 0) {
                     Manager.serverChat("HỆ THÔNG", "HIỆN TẠI ĐANG DIỄN RA SỰ KIỆN MÙNG 8 THÁNG 3 CÁC BẠN CÓ THỂ CHƠI SỰ KIỆN TẠI NPC TIÊN NỮ . VÀ SĂN TOP ĐỂ CÓ PHẦN QUÀ HẤP DẪN");
                 }
                      if((min == 58 || min == 20)&& sec == 0) {
-                    Manager.serverChat("HỆ THÔNG", "CHÚC CÁC BẠN CHƠI GAME VUI VẺ RA NHẬP BOX CHÁT ZALO ĐỂ BIẾT THÊM ƯU ĐÃI WEB NSOHUYDAT.ONLINE");
+                    Manager.serverChat("HỆ THÔNG", "Chúc các bạn chơi game vui vẻ!");
                 }
         if((min == 58 || min == 18)&& sec == 0) {
-                    Manager.serverChat("HỆ THÔNG", "CHÚC CÁC BẠN CHƠI GAME VUI VẺ RA NHẬP BOX CHÁT ZALO ĐỂ BIẾT THÊM ƯU ĐÃI WEB NSOHUYDAT.ONLINE");
+                    Manager.serverChat("HỆ THÔNG", "Chúc các bạn chơi game vui vẻ!");
                 }
                 if((min == 58 || min == 120)&& sec == 0) {
                     Manager.serverChat("Server", "Hệ thống đang tự động cập nhật dữ liệu người chơi có thể gây lag!");
